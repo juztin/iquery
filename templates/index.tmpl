@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+	<title>iquery</title>
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+
+	<link type='text/css' rel='stylesheet' href='/static/css/site.css' />
+</head>
+
+<body>
+	<section class='database'>
+		<header class='toolbar'>
+			<select class='databases'>
+				{{range $key, $value := .Servers -}}
+				<option data-database='{{$key}}'>{{$key}}</option>
+				{{- end}}
+			</select>
+
+			<nav style='display: inline-block;'>
+				<a href='javascript:void(0)' class='selected' data-section='query'>Query</a>
+				<a href='javascript:void(0)' data-section='navigator'>Navigator</a>
+			</nav>
+
+			<div class='limit'>
+				<label>limit</label>
+				<input type='number' min='0' max='1000' value='1000' />
+			</div>
+		</header>
+
+		<section class='navigator'><div></div></section>
+
+		<section class='query selected'>
+			<div class='controls' style='z-index: 1'>
+				<div class='scripts'>
+					<a href='javascript: void(0)'></a>
+					<div>
+						<input type='text' placeholder='script name' /><button type='button'>save</button>
+						<ul></ul>
+					</div>
+				</div>
+			</div>
+			<div class='input'></div>
+			<div class='results'></div>
+		</section>
+	</section>
+	
+	<div class='overlay'><div class='loader'></div></div>
+
+	<script src="/static/monaco-editor/min/vs/loader.js"></script>
+	<script src="/static/monaco-editor/min/vs/loader.js"></script>
+	<script src='/static/js/site.js'></script>
+	<script>
+		(function (doc, $, qs) {
+
+			var overlay = $.overlay('.overlay'),
+				nav = qs('nav'),
+				dbs = qs('.databases'),
+				limit = qs('.limit input'),
+				navigator,
+				scripts,
+				query = $.iquery.query(
+					qs('.query .input'),                     // Query editor container
+					qs('.query .results'),                   // Query results container
+					dbs.selectedOptions[0].dataset.database, // Current selected DB (first in list)
+					'{{.Placeholder}}',                      // Placeholder SQL
+					'{{.Theme}}',                            // Monaco theme
+					overlay);
+
+
+			function initScripts() {
+				function onHideScripts (event) {
+					var p = this.parentNode;
+					if (!p.contains(event.toElement) || p == event.toElement) p.classList.remove('selected');
+				}
+
+				qs('.controls .scripts > a').addEventListener('mouseenter', function (event) {
+					this.parentNode.classList.add('selected');
+				});
+				qs('.controls .scripts > a').addEventListener('mouseout', onHideScripts, false)
+				qs('.controls .scripts > div').addEventListener('mouseout', onHideScripts, false);
+				scripts = $.iquery.scripts(qs('.controls .scripts div'), dbs.selectedOptions[0].value, query.getQuery, query.setQuery);
+			}
+
+			function initLimit() {
+				// On Limit Change
+				limit.addEventListener('change', function () {
+					query.setLimit(this.value);
+				}, false);
+				// On Database Selection
+				dbs.addEventListener('change', function () {
+					var selected = this.selectedOptions[0],
+						database = selected.dataset.database;
+
+					doc.title = selected.value;    // Set window/tab title
+					query.setDatabase(database);   // Update selected DB
+					scripts.setDatabase(database); // Update saved scripts list
+					if (navigator != null) {
+						navigator.setDatabase(database);
+					}
+				}, false);
+			}
+
+			function initTabs() {
+				// Tab Selection – (query/navigator toggle)
+				Array.prototype.forEach.call(nav.querySelectorAll('a'), function (item) {
+					item.addEventListener('click', function () {
+						var selected = this,
+							current = nav.querySelector('.selected'),
+							selectedSection = qs('.'+selected.dataset.section),
+							currentSection = qs('.'+current.dataset.section);
+
+						// Ignore already selected tab
+						if (this.classList.contains('selected')) {
+							return;
+						}
+
+						// Switcharoo
+						current.classList.remove('selected');
+						currentSection.classList.remove('selected');
+						selected.classList.add('selected');
+						selectedSection.classList.add('selected');
+
+						if (selected.dataset.section == 'query') {
+							query.layout();
+						}
+
+						// Initialize Navigator on First Use
+						if (navigator == null && selected.dataset.section == 'navigator') {
+							var database = dbs.selectedOptions[0].dataset.database;
+							navigator = $.iquery.navigator(qs('.navigator > div'), database, overlay);
+						}
+					}, false);
+				});
+			}
+
+			initScripts();
+			initLimit();
+			initTabs();
+
+			// Set Initial Title
+			doc.title = dbs.selectedOptions[0].value;
+			setTimeout(overlay.hide, 250);
+
+		})(window.document, window['$'], function (qs) { return document.querySelector(qs) });
+	</script>
+</body>
+</html>

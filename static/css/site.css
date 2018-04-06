@@ -1,0 +1,456 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+body {
+	overflow: hidden;
+}
+
+.noResults {
+	background-color: rgb(220, 220, 220);
+	background-image: repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(255,255,255,.5) 5px, rgba(255,255,255,.5) 10px);
+	color: rgb(150, 150, 150);
+	font-size: 18px;
+	text-align: center;
+}
+.noResults:after {
+    display: block;
+    content: 'No Results';
+    vertical-align: middle;
+}
+
+/* ------------------------------=> Toolbar <=------------------------------- */
+.toolbar {
+	/*position: fixed;
+	z-index: 999;*/
+	background-color: rgb(100, 120, 180);
+	color: rgb(245, 245, 255);
+}
+.toolbar .limit {
+	float: right;
+	overflow: auto;
+	height: 100%;
+}
+.toolbar .limit input {
+	width: 6ch;
+}
+.toolbar {
+	border-bottom: solid 2px rgb(120, 140, 200);
+}
+.toolbar select,
+.toolbar .limit {
+    margin: 6px;
+}
+.toolbar nav {
+    display: inline-block;
+    height: 25px;
+	font-size: 0;
+}
+.toolbar nav a {
+    display: inline-block;
+    width: 100px;
+    height: 100%;
+    margin: 0;
+    padding-top: 6px;
+    text-align: center;
+	font-size: 14px;
+    text-decoration: none;
+    color: white;
+	background-color: rgba(170, 170, 210, 0.4);
+	transition: background-color .3s
+}
+.toolbar nav a:hover {
+    background-color: rgba(240, 240, 255, 0.4);
+}
+.toolbar nav a+a {
+	border-left: solid 1px rgb(100, 120, 180);
+}
+.toolbar nav a.selected {
+    background-color: rgba(240, 240, 255, 0.4);
+    cursor: default;
+}
+/* ------------------------------=> Database <=------------------------------ */
+.database {
+	height: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: relative;
+}
+.database section {
+	display: none;
+	/*margin-top: 33px;*/
+}
+.database section.selected {
+	display: block;
+}
+
+/* -----------------------------=> Navigator <=------------------------------ */
+.navigator { height: 100%; }
+.navigator > div {
+	display: flex;
+	width: 100%;
+	height: 100%;
+}
+.navigator > div div {
+	flex-basis: 100%;
+}
+.navigator div:not(:last-child) label {
+	border-right: solid 2px rgb(130, 240, 90);
+}
+.navigator div:not(:last-child) ul {
+	border-right: solid 1px rgb(130, 240, 200);
+}
+.navigator > div > div > label {
+	display: block;
+	padding: 3px 30px;
+	background-color: rgb(100, 220, 180);
+	color: rgb(50, 70, 130);
+	text-align: center;
+}
+.navigator ul {
+	height: 100%;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: auto;
+}
+.navigator li {
+	padding: 2px 15px;
+	color: rgb(20, 60, 90);
+	transition: background-color .15s;
+}
+.navigator li:hover:not(.noResults) {
+	background-color: rgb(130, 240, 200);
+}
+.navigator li.selected {
+	background-color: rgb(130, 240, 200);
+}
+.navigator li.selected:hover {
+	cursor: default;
+}
+.navigator div li:hover:not(.selected):not(.noResults) {
+	cursor: pointer;
+}
+.navigator .tables span+span {
+	font-style: italic;
+	font-size: 12px;
+	color: rgb(60, 130, 100);
+}
+.navigator .tables span+span:before {
+	content: ' \2013  ';
+	color: rgb(60, 130, 100);
+}
+.navigator .columns li {
+	border-bottom: dashed 1px rgb(130, 240, 200);
+	padding: 0;
+	background-color: rgb(240, 250, 240);
+}
+.navigator .columns li:hover {
+	background-color: rgb(240, 250, 240);
+	cursor: default !important;
+}
+.navigator .columns .name {
+	padding: 3px 2px 3px 15px;
+}
+.navigator .columns .name,
+.navigator .columns .description {
+	display: inline-block;
+}
+.navigator .columns .description {
+	font-style: italic;
+	font-size: 14px;
+	color: rgb(60, 130, 100);
+}
+.navigator .columns .description:before {
+	display: inline-block;
+	margin: 0 0.3em;
+	content: '\2013';
+	color: rgb(60, 130, 100);
+}
+.navigator .columns .type,
+.navigator .columns .nullable,
+.navigator .columns .default {
+	display: block;
+	font-size: 12px;
+	padding: 1px 30px;
+	background-color: white;
+}
+.navigator .columns .type:before,
+.navigator .columns .nullable:before,
+.navigator .columns .default:before {
+	display: inline-block;
+	width: 4em;
+	margin-right: 3px;
+	font-weight: normal;
+	font-style: italic;
+	color: rgb(60, 130, 100);
+}
+.navigator .columns .type:before {
+	content: 'type:';
+}
+.navigator .columns .default:before {
+	content: 'default:';
+}
+.navigator .columns .nullable:before {
+	content: 'nullable:';
+}
+.navigator .noResults {
+	height: 100%;
+}
+.navigator .noResults:after {
+    margin: 40% 0;
+}
+/* ----------------------------=> Script Menu <=----------------------------- */
+.controls {
+	position: absolute;
+	top: 0;
+	left: 350px;
+	background-color: rgb(100, 120, 180);
+	border-radius: 3px;
+}
+/* Menu Icon */
+.controls .scripts > a
+{
+    display: block;
+    background: rgb(100, 120, 180);
+    width: 40px;
+    height: 30px;
+    position: relative;
+}
+.controls .scripts > a:before, .controls .scripts > a:after
+{
+    display: block;
+    content: "";
+    position: absolute;
+    border-radius: 2px;
+    background: rgb(230, 230, 255);
+}
+.controls .scripts > a:before
+{
+    width: 4px;
+    height: 22px;
+    top: calc(50% - 11px);
+    left: calc(50% - 2px);
+}
+.controls .scripts > a:after
+{
+    width: 22px;
+    height: 4px;
+    top: calc(50% - 2px);
+    left: calc(50% - 11px);
+}
+/* Menu Container */
+.controls .scripts div {
+	display: none;
+	border: solid 2px rgb(120, 140, 200);
+	border-top: none;
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+	padding: 15px;
+	margin-top: -1px;
+	box-shadow: 5px 9px 15px rgba(210, 225, 245, 0.4);
+}
+.controls .scripts.selected div {
+	display: block;
+}
+/* Menu Item List */
+.controls .scripts ul {
+	margin: 0;
+	padding: 3px;
+	list-style-type: none;
+	background-color: white;
+	border-radius: 2px;
+	margin-top: 5px;
+	max-height: 300px;
+	overflow: auto;
+}
+.controls .scripts li > a {
+	display: block;
+	text-decoration: none;
+	color: rgb(100, 120, 180);
+	font-size: 14px;
+	transition: background-color 1x;
+	padding: 0 5px;
+	vertical-align: middle;
+}
+.controls .scripts li > a:hover {
+	background-color: rgb(130, 240, 200);
+}
+/* Save Button */
+.controls .scripts button {
+	border: solid 1px green;
+	background-color: rgb(170, 190, 250);
+	color: white;
+	transition: background-color 0.2s;
+}
+.controls .scripts button:hover {
+	cursor: pointer;
+	background-color: rgb(220, 255, 245);
+	color: rgb(100, 120, 180);
+}
+/* Delete Button */
+.controls .scripts li > a.remove {
+	float: right;
+    border-radius: 14px;
+    position: relative;
+    color: red;
+}
+.controls .scripts li > a.remove:after {
+	font-size: 14px;
+	font-family: monospace;
+	vertical-align: top;
+    /*content: '\274c';*/
+    content: 'X';
+}
+.controls .scripts li > a.remove:hover {
+	background-color: red;
+	color: white;
+}
+
+/* -------------------------------=> query <=-------------------------------- */
+.query .input {
+	width: 100%;
+	height: 200px;
+	border: 1px solid grey;
+}
+.query .results {
+	width: 100%;
+	overflow: auto;
+}
+.query .results table {
+	border-collapse: collapse;
+}
+.query .results tr:nth-child(odd) {
+	background-color: rgb(245, 245, 255);
+}
+.query .results th,
+.query .results td {
+	white-space: pre;
+	border: 1px solid rgb(220, 220, 230);
+}
+.query .results th {
+	padding: 15px 10px;
+	text-align: left;
+	background-color: rgb(100, 120, 180);
+	color: rgb(245, 245, 255);
+	font-weight: normal;
+}
+.results td {
+	padding: 3px 10px;
+}
+.results td.nil {
+	background-color: rgb(255, 230, 240);;
+}
+.results td.noResults {
+	padding: 50px;
+	font-size: 28px;
+}
+.results .querySets th {
+	border-top: none;
+}
+.results .querySetTabs {
+	background-color: rgb(100, 220, 180);
+}
+.results .querySetTabs a {
+	display: inline-block;
+	padding: 0px 20px 5px 20px;
+	border-top: solid 5px transparent;
+	border-top-right-radius: 15px;
+	font-size: 20px;
+	text-decoration: none;
+	color: rgb(50, 70, 130);
+}
+.results .querySetTabs a.selected {
+	background-color: rgb(100, 120, 180);
+	color: white;
+}
+.results .querySetTabs a.selected:hover {
+	cursor: default;
+}
+.results .querySetTabs a:not(.selected):hover {
+	background-color: rgb(230, 250, 240);
+	border-top-right-radius: 0;
+}
+.results .querySetResults {
+	width: 100%;
+	overflow-y: auto;
+}
+.results .querySetResults th:first-child {
+	border-left-color: rgb(100, 120, 180);
+}
+.results .querySetResults table:not(.selected) {
+	display: none;
+}
+/* -------------------------------=> Spinner <=------------------------------ */
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(120, 120, 120, 0.8);
+	z-index: 9999;
+}
+.overlay > div {
+	background: 
+}
+.loader,
+.loader:before,
+.loader:after {
+  background: #ffffff;
+  -webkit-animation: load1 1s infinite ease-in-out;
+  animation: load1 1s infinite ease-in-out;
+  width: 1em;
+  height: 4em;
+}
+.loader {
+  color: #ffffff;
+  text-indent: -9999em;
+  margin: 88px auto;
+  position: relative;
+  font-size: 11px;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+.loader:before,
+.loader:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+.loader:before {
+  left: -1.5em;
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+.loader:after {
+  left: 1.5em;
+}
+@-webkit-keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em;
+    height: 5em;
+  }
+}
+@keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em;
+    height: 5em;
+  }
+}
